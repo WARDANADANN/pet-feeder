@@ -1,107 +1,176 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mqtt = require('mqtt');
-const cron = require('node-cron');
+const http = require('http');
+const WebSocket = require('ws');
 const mysql = require('mysql2');
+const cron = require('node-cron');
+const ejs = require('ejs');
 
 const app = express();
-app.use(bodyParser.json());
-app.use(express.static('public')); // Tambahkan ini untuk melayani file statis dari folder public
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-const mqttClient = mqtt.connect('ws://broker.emqx.io:8083/mqtt'); // atau alamat broker MQTT yang lain
+app.use(bodyParser.json());
+app.use(express.static('public'));
+
+const mqttClient = mqtt.connect('ws://broker.emqx.io:8083/mqtt'); // Sesuaikan dengan alamat broker MQTT Anda
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'alarm_db'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'alarm_db'
 });
+
+let latestMessage = ''; // Untuk menyimpan pesan terbaru dari MQTT
+
+// MQTT connection and message handling
 mqttClient.on('connect', () => {
-  console.log('Connected to MQTT broker');
-  mqttClient.publish('PET/BTN', 'Connected with web'); // Publish pesan saat terhubung ke broker MQTT
+    console.log('Connected to MQTT broker');
+    mqttClient.publish('PET/BTN', 'Connected with web');
+    mqttClient.subscribe('PET/LED', (err) => {
+        if (err) {
+            console.error('Failed to subscribe to MQTT topic:', err);
+        }
+    });
+});
+
+mqttClient.on('message', (topic, message) => {
+    if (topic === 'PET/LED') {
+        latestMessage = message.toString();
+        console.log(`Received message: ${latestMessage}`);
+        // Kirim pesan melalui WebSocket ke klien yang terhubung
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(latestMessage);
+            }
+        });
+    }
 });
 
 db.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to database');
-});
-// API untuk menambahkan jadwal alarm
-app.post('/add-alarm', (req, res) => {
-  const { day, hour, minute, message } = req.body;
-  console.log('Received alarm data:', { day, hour, minute, message }); // Debugging log
-  const query = 'INSERT INTO alarms (day, hour, minute, message) VALUES (?, ?, ?, 1)';
-  db.query(query, [day, hour, minute, message], (err, results) => {
     if (err) {
-      console.error('Database error:', err); // Log error
-      res.status(500).send({ success: false });
-      return;
+        console.error('Error connecting to database:', err);
+        return;
     }
-    res.send({ success: true });
-  });
+    console.log('Connected to database');
 });
 
+// Handle WebSocket connections
+wss.on('connection', (ws) => {
+    console.log('Client connected to WebSocket');
 
-// API untuk menambahkan jadwal alarm
-// app.post('/add-alarm', (req, res) => {
-//   const { day, hour, minute } = req.body;
-//   const query = 'INSERT INTO alarms (day, hour, minute) VALUES (?, ?, ?)';
-//   db.query(query, [day, hour, minute], (err, results) => {
-//     if (err) throw err;
-//     res.send({ success: true });
-//   });
-// });
+    // Kirim pesan terbaru ke klien yang baru terhubung
+    if (latestMessage) {
+        ws.send(latestMessage);
+    }
 
-// Scheduler untuk mengecek alarm
-// cron.schedule('* * * * *', () => {
-//   const now = new Date();
-//   const day = now.getDay(); // 0-6 (Minggu - Sabtu)
-//   const hour = now.getHours();
-//   const minute = now.getMinutes();
-
-//     const query = 'SELECT * FROM alarms WHERE day = ? AND hour = ? AND minute = ?';
-//     // console.log(db.query(query, [day, hour, minute]));
-//   db.query(query, [day, hour, minute], (err, results) => {
-//     if (err) throw err;
-//     if (results.length > 0) {
-//       mqttClient.publish('PET/BTN', 'ON');
-//     }
-//   });
-// });
-
-// Scheduler untuk mengecek alarm
-cron.schedule('* * * * *', () => {
-  const now = new Date();
-  const currentDay = now.getDay(); // 0-6 (Minggu - Sabtu)
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-
-  // Ambil semua alarm yang harus aktif saat ini
-  const query = 'SELECT * FROM alarms WHERE (day = ? OR day = -1) AND (hour = ? OR hour = -1) AND (minute = ? OR minute = -1)';
-  db.query(query, [currentDay, currentHour, currentMinute], (err, results) => {
-    if (err) throw err;
-
-    // Kirim pesan ke MQTT untuk setiap alarm yang aktif
-    results.forEach(alarm => {
-      if (alarm.day === -1) {
-        // Jika day == -1, maka hanya periksa hour dan minute
-        if (alarm.hour === currentHour && alarm.minute === currentMinute) {
-          mqttClient.publish('PET/BTN', alarm.message);
-        }
-      } else {
-        // Jika day != -1, maka periksa day, hour, dan minute
-        mqttClient.publish('PET/BTN', alarm.message);
-      }
+    ws.on('close', () => {
+        console.log('Client disconnected from WebSocket');
     });
-  });
+
+    ws.on('error', (err) => {
+        console.error('WebSocket error:', err);
+    });
+
+    ws.on('message', (message) => {
+        console.log('Received message from client:', message);
+    });
 });
 
+// Set an interval to send ping messages to keep the connection alive
+setInterval(() => {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.ping();
+        }
+    });
+}, 30000); // Set interval to 30 seconds or as needed
 
+// Set EJS sebagai template engine
+app.set('view engine', 'ejs');
+app.set('views', 'views');
 
 // Rute untuk melayani index.html
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+    const query = 'SELECT * FROM alarms';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Error fetching data');
+        }
+        res.render('index', { alarms: results, latestMessage });
+    });
 });
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+// Endpoint untuk menerima pesan dari frontend via GET parameter
+app.get('/send-message', (req, res) => {
+    const message = req.query.message;
+
+    mqttClient.publish('PET/BTN', message, (err) => {
+        if (err) {
+            return res.status(500).send('Failed to publish message');
+        }
+        res.send('Message sent to MQTT broker');
+    });
+});
+
+// Endpoint untuk menambahkan alarm
+app.post('/add-alarm', (req, res) => {
+    const { day, hour, minute, message } = req.body;
+    console.log('Received alarm data:', { day, hour, minute, message });
+
+    const query = 'INSERT INTO alarms (day, hour, minute, message) VALUES (?, ?, ?, ?)';
+    db.query(query, [day, hour, minute, message], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send({ success: false, error: err.message });
+        }
+
+        // Jika alarm yang ditambahkan aktif pada saat ini, kirim pesan ke MQTT
+        const now = new Date();
+        if ((day === now.getDay() || day === 7) && (hour == now.getHours() || hour === -1) && (minute == now.getMinutes() || minute === -1)) {
+            mqttClient.publish('PET/BTN', message);
+        }
+
+        res.send({ success: true });
+    });
+});
+
+// Scheduler untuk mengecek alarm
+cron.schedule('* * * * *', () => {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0-6 (Minggu - Sabtu)
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    console.log('Running cron job at:', now); // Log waktu eksekusi
+
+    // Ambil semua alarm yang harus aktif saat ini
+    const query = 'SELECT * FROM alarms WHERE (day = ? OR day = 7) AND (hour = ? OR hour = -1) AND (minute = ? OR minute = -1)';
+    db.query(query, [currentDay, currentHour, currentMinute], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return;
+        }
+
+        // Log jumlah alarm yang diambil
+        console.log('Number of alarms found:', results.length);
+
+        // Kirim pesan ke MQTT untuk setiap alarm yang aktif
+        results.forEach(alarm => {
+            mqttClient.publish('PET/BTN', alarm.message, (err) => {
+                if (err) {
+                    console.error('Failed to publish message:', err);
+                } else {
+                    console.log('Published message:', alarm.message);
+                }
+            });
+        });
+    });
+});
+
+// Server mendengarkan pada port 3000
+server.listen(3000, () => {
+    console.log('Server is running on port 3000');
 });

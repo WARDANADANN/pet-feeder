@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta http-equiv="refresh" content="5"> Refresh halaman setiap 5 detik -->
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <title>Document</title>
+
+</head>
+
+<body class="bg-blue-50 w-[460px] mx-auto">
+    <div class="grid grid-cols-3 gap-2 px-4  h-[20vh] rounded-b-full">
+        <div class="text-xs font-semibold flex flex-col justify-center items-center text-center">
+            <h2>Portion/feed (gr)</h2>
+            <input id="portion" class="w-full text-center text-lg font-bold rounded-md  py-2" type="number" value="10">
+        </div>
+        <button onclick="sendMessage()" class=" flex items-center justify-center h-full relative">
+            <div
+                class="p-8 h-[110px] flex-col   aspect-square outline outline-8 outline-blue-100  bg-blue-950 stroke-white  absolute -bottom-16 rounded-full flex items-center justify-center">
+                <img class="" src="assets/icon/icon-feed.svg" alt="" srcset="">
+                <h1 class="font-semibold text-white">Feed</h1>
+            </div>
+        </button>
+        <div class="text-xs font-semibold flex flex-col justify-center items-center text-center">
+            <h2>Sisa Makanan</h2>
+            <h1 id="latestMessage" class="w-full text-center text-lg font-bold rounded-md  py-2 disabled bg-white">
+            </h1>
+        </div>
+    </div>
+
+    <!-- Action -->
+    <div class=" text-xs text-center font-semibold w-full  mt-24 grid grid-cols-4 gap-x-6 gap-y-1 px-4">
+        <div class="bg-white shadow-2xl   aspect-square rounded-2xl flex justify-center items-center">
+            <svg class="drop-shadow-2xl shadow-red-900" width="34" height="34" viewBox="0 0 62 62"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M31 56.8333C20.0389 56.8333 14.5597 56.8333 11.1548 53.0487C7.75 49.2693 7.75 43.1778 7.75 31C7.75 18.8221 7.75 12.7332 11.1548 8.94863C14.5597 5.16663 20.0415 5.16663 31 5.16663C41.9611 5.16663 47.4403 5.16663 50.8452 8.94863C54.25 12.7358 54.25 18.8221 54.25 31C54.25 43.1778 54.25 49.2667 50.8452 53.0487C47.4403 56.8333 41.9585 56.8333 31 56.8333ZM38.75 15.5H23.25C22.0487 15.5 21.4494 15.5 20.956 15.6317C20.2995 15.8079 19.7009 16.1536 19.2202 16.6343C18.7396 17.1149 18.3938 17.7135 18.2177 18.37C18.0833 18.8686 18.0833 19.468 18.0833 20.6666C18.0833 21.8653 18.0833 22.4672 18.2151 22.9606C18.3912 23.6171 18.737 24.2158 19.2176 24.6964C19.6983 25.177 20.2969 25.5228 20.9534 25.699C21.452 25.8333 22.0513 25.8333 23.25 25.8333H38.75C39.9512 25.8333 40.5506 25.8333 41.044 25.7015C41.7005 25.5254 42.2991 25.1796 42.7798 24.699C43.2604 24.2183 43.6062 23.6197 43.7823 22.9632C43.9167 22.4646 43.9167 21.8653 43.9167 20.6666C43.9167 19.468 43.9167 18.866 43.7849 18.3726C43.6087 17.7161 43.263 17.1175 42.7824 16.6369C42.3017 16.1562 41.7031 15.8105 41.0466 15.6343C40.5506 15.5 39.9487 15.5 38.75 15.5ZM23.25 33.5833C23.25 34.2684 22.9778 34.9255 22.4934 35.41C22.0089 35.8945 21.3518 36.1666 20.6667 36.1666C19.9815 36.1666 19.3244 35.8945 18.84 35.41C18.3555 34.9255 18.0833 34.2684 18.0833 33.5833C18.0833 32.8982 18.3555 32.2411 18.84 31.7566C19.3244 31.2721 19.9815 31 20.6667 31C21.3518 31 22.0089 31.2721 22.4934 31.7566C22.9778 32.2411 23.25 32.8982 23.25 33.5833ZM31 36.1666C31.6851 36.1666 32.3422 35.8945 32.8267 35.41C33.3112 34.9255 33.5833 34.2684 33.5833 33.5833C33.5833 32.8982 33.3112 32.2411 32.8267 31.7566C32.3422 31.2721 31.6851 31 31 31C30.3149 31 29.6578 31.2721 29.1733 31.7566C28.6888 32.2411 28.4167 32.8982 28.4167 33.5833C28.4167 34.2684 28.6888 34.9255 29.1733 35.41C29.6578 35.8945 30.3149 36.1666 31 36.1666ZM43.9167 33.5833C43.9167 34.2684 43.6445 34.9255 43.16 35.41C42.6756 35.8945 42.0185 36.1666 41.3333 36.1666C40.6482 36.1666 39.9911 35.8945 39.5066 35.41C39.0222 34.9255 38.75 34.2684 38.75 33.5833C38.75 32.8982 39.0222 32.2411 39.5066 31.7566C39.9911 31.2721 40.6482 31 41.3333 31C42.0185 31 42.6756 31.2721 43.16 31.7566C43.6445 32.2411 43.9167 32.8982 43.9167 33.5833ZM41.3333 46.5C42.0185 46.5 42.6756 46.2278 43.16 45.7433C43.6445 45.2589 43.9167 44.6018 43.9167 43.9166C43.9167 43.2315 43.6445 42.5744 43.16 42.0899C42.6756 41.6055 42.0185 41.3333 41.3333 41.3333C40.6482 41.3333 39.9911 41.6055 39.5066 42.0899C39.0222 42.5744 38.75 43.2315 38.75 43.9166C38.75 44.6018 39.0222 45.2589 39.5066 45.7433C39.9911 46.2278 40.6482 46.5 41.3333 46.5ZM33.5833 43.9166C33.5833 44.6018 33.3112 45.2589 32.8267 45.7433C32.3422 46.2278 31.6851 46.5 31 46.5C30.3149 46.5 29.6578 46.2278 29.1733 45.7433C28.6888 45.2589 28.4167 44.6018 28.4167 43.9166C28.4167 43.2315 28.6888 42.5744 29.1733 42.0899C29.6578 41.6055 30.3149 41.3333 31 41.3333C31.6851 41.3333 32.3422 41.6055 32.8267 42.0899C33.3112 42.5744 33.5833 43.2315 33.5833 43.9166ZM20.6667 46.5C21.3518 46.5 22.0089 46.2278 22.4934 45.7433C22.9778 45.2589 23.25 44.6018 23.25 43.9166C23.25 43.2315 22.9778 42.5744 22.4934 42.0899C22.0089 41.6055 21.3518 41.3333 20.6667 41.3333C19.9815 41.3333 19.3244 41.6055 18.84 42.0899C18.3555 42.5744 18.0833 43.2315 18.0833 43.9166C18.0833 44.6018 18.3555 45.2589 18.84 45.7433C19.3244 46.2278 19.9815 46.5 20.6667 46.5Z"
+                    fill="#00BF91" />
+            </svg>
+
+        </div>
+        <div class="bg-white shadow-2xl   aspect-square rounded-2xl flex justify-center items-center ">
+            <svg class="drop-shadow-2xl shadow-red-900" width="32" height="32" viewBox="0 0 46 53"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M33 0.5C33.663 0.5 34.2989 0.763392 34.7678 1.23223C35.2366 1.70107 35.5 2.33696 35.5 3V5.5H40.5C41.7614 5.4996 42.9764 5.97602 43.9014 6.83374C44.8263 7.69147 45.3929 8.86711 45.4875 10.125L45.5 10.5V40.5C45.5004 41.7614 45.024 42.9764 44.1663 43.9014C43.3085 44.8263 42.1329 45.3929 40.875 45.4875L40.5 45.5H5.5C4.23856 45.5004 3.02358 45.024 2.09863 44.1663C1.17368 43.3085 0.607109 42.1329 0.512501 40.875L0.5 40.5V10.5C0.499601 9.23856 0.976016 8.02358 1.83374 7.09863C2.69147 6.17368 3.86711 5.60711 5.125 5.5125L5.5 5.5H10.5V3C10.5 2.33696 10.7634 1.70107 11.2322 1.23223C11.7011 0.763392 12.337 0.5 13 0.5C13.663 0.5 14.2989 0.763392 14.7678 1.23223C15.2366 1.70107 15.5 2.33696 15.5 3V5.5H30.5V3C30.5 2.33696 30.7634 1.70107 31.2322 1.23223C31.7011 0.763392 32.337 0.5 33 0.5ZM30.06 16.4475L19.455 27.0525L15.9175 23.5175C15.446 23.0621 14.8145 22.8101 14.159 22.8158C13.5035 22.8215 12.8765 23.0844 12.413 23.548C11.9494 24.0115 11.6865 24.6385 11.6808 25.294C11.6751 25.9495 11.9271 26.581 12.3825 27.0525L17.6675 32.34C17.902 32.5747 18.1805 32.7609 18.4869 32.8879C18.7934 33.015 19.122 33.0804 19.4538 33.0804C19.7855 33.0804 20.1141 33.015 20.4206 32.8879C20.727 32.7609 21.0055 32.5747 21.24 32.34L33.595 19.9825C33.8338 19.7519 34.0242 19.476 34.1553 19.171C34.2863 18.866 34.3552 18.538 34.3581 18.206C34.361 17.8741 34.2978 17.5449 34.1721 17.2376C34.0464 16.9304 33.8607 16.6512 33.626 16.4165C33.3913 16.1818 33.1121 15.9961 32.8049 15.8704C32.4976 15.7447 32.1684 15.6815 31.8365 15.6844C31.5045 15.6873 31.1765 15.7562 30.8715 15.8872C30.5665 16.0183 30.2906 16.2087 30.06 16.4475Z"
+                    fill="#339BFB" />
+            </svg>
+
+        </div>
+        <div class="bg-white shadow-2xl   aspect-square rounded-2xl flex justify-center items-center ">
+            <svg class="" width="33" height="33" viewBox="0 0 57 57" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M11.875 49.875C10.5687 49.875 9.45092 49.4103 8.5215 48.4809C7.59208 47.5515 7.12658 46.4328 7.125 45.125V11.875C7.125 10.5687 7.5905 9.45092 8.5215 8.5215C9.4525 7.59208 10.5703 7.12658 11.875 7.125H45.125C46.4313 7.125 47.5499 7.5905 48.4809 8.5215C49.4119 9.4525 49.8766 10.5703 49.875 11.875V45.125C49.875 46.4313 49.4103 47.5499 48.4809 48.4809C47.5515 49.4119 46.4328 49.8766 45.125 49.875H11.875ZM28.5 11.875V26.4219C28.5 26.8969 28.6979 27.2436 29.0938 27.4621C29.4896 27.6806 29.8854 27.6703 30.2812 27.4312L33.1906 25.65C33.5865 25.4125 34.0021 25.2937 34.4375 25.2937C34.8729 25.2937 35.2885 25.4125 35.6844 25.65L38.5938 27.4312C38.9896 27.6688 39.3854 27.679 39.7812 27.4621C40.1771 27.2452 40.375 26.8985 40.375 26.4219V11.875H28.5Z"
+                    fill="#FFAF47" />
+            </svg>
+
+        </div>
+        <div class="bg-white shadow-2xl   aspect-square rounded-2xl flex justify-center items-center ">
+            <svg class="" width="32" height="32" viewBox="0 0 50 47" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M6.87504 22.3021C5.18337 22.3021 3.75351 21.7181 2.58546 20.55C1.4174 19.382 0.833374 17.9521 0.833374 16.2605C0.833374 14.5688 1.4174 13.1389 2.58546 11.9709C3.75351 10.8028 5.18337 10.2188 6.87504 10.2188C8.56671 10.2188 9.99657 10.8028 11.1646 11.9709C12.3327 13.1389 12.9167 14.5688 12.9167 16.2605C12.9167 17.9521 12.3327 19.382 11.1646 20.55C9.99657 21.7181 8.56671 22.3021 6.87504 22.3021ZM17.75 12.6355C16.0584 12.6355 14.6285 12.0514 13.4605 10.8834C12.2924 9.71532 11.7084 8.28546 11.7084 6.59379C11.7084 4.90212 12.2924 3.47226 13.4605 2.30421C14.6285 1.13615 16.0584 0.552124 17.75 0.552124C19.4417 0.552124 20.8716 1.13615 22.0396 2.30421C23.2077 3.47226 23.7917 4.90212 23.7917 6.59379C23.7917 8.28546 23.2077 9.71532 22.0396 10.8834C20.8716 12.0514 19.4417 12.6355 17.75 12.6355ZM32.25 12.6355C30.5584 12.6355 29.1285 12.0514 27.9605 10.8834C26.7924 9.71532 26.2084 8.28546 26.2084 6.59379C26.2084 4.90212 26.7924 3.47226 27.9605 2.30421C29.1285 1.13615 30.5584 0.552124 32.25 0.552124C33.9417 0.552124 35.3716 1.13615 36.5396 2.30421C37.7077 3.47226 38.2917 4.90212 38.2917 6.59379C38.2917 8.28546 37.7077 9.71532 36.5396 10.8834C35.3716 12.0514 33.9417 12.6355 32.25 12.6355ZM43.125 22.3021C41.4334 22.3021 40.0035 21.7181 38.8355 20.55C37.6674 19.382 37.0834 17.9521 37.0834 16.2605C37.0834 14.5688 37.6674 13.1389 38.8355 11.9709C40.0035 10.8028 41.4334 10.2188 43.125 10.2188C44.8167 10.2188 46.2466 10.8028 47.4146 11.9709C48.5827 13.1389 49.1667 14.5688 49.1667 16.2605C49.1667 17.9521 48.5827 19.382 47.4146 20.55C46.2466 21.7181 44.8167 22.3021 43.125 22.3021ZM12.0709 46.4688C10.2584 46.4688 8.73749 45.7744 7.50821 44.3856C6.27893 42.9968 5.6651 41.3551 5.66671 39.4605C5.66671 37.366 6.38204 35.5334 7.81271 33.9625C9.24337 32.3917 10.6628 30.841 12.0709 29.3105C13.2389 28.0618 14.2459 26.7029 15.0917 25.2335C15.9375 23.7642 16.9445 22.3843 18.1125 21.0938C18.9987 20.0466 20.0257 19.1806 21.1938 18.4959C22.3618 17.8112 23.6306 17.4688 25 17.4688C26.3695 17.4688 27.6382 17.791 28.8063 18.4355C29.9743 19.0799 31.0014 19.9257 31.8875 20.973C33.0153 22.2618 34.0126 23.6514 34.8794 25.1417C35.7462 26.632 36.7628 28.0216 37.9292 29.3105C39.3389 30.841 40.7583 32.3917 42.1874 33.9625C43.6164 35.5334 44.3318 37.366 44.3334 39.4605C44.3334 41.3535 43.7187 42.9952 42.4895 44.3856C41.2602 45.776 39.7401 46.4704 37.9292 46.4688C35.7542 46.4688 33.5993 46.2875 31.4646 45.925C29.3299 45.5625 27.175 45.3813 25 45.3813C22.825 45.3813 20.6702 45.5625 18.5355 45.925C16.4007 46.2875 14.2459 46.4688 12.0709 46.4688Z"
+                    fill="#FF7FCC" />
+            </svg>
+        </div>
+        <h1>Feeding Calculator</h1>
+        <h1>Reminder</h1>
+        <h1>Guide</h1>
+        <h1>Pet</h1>
+    </div>
+
+    <div class="px-4 pt-4">
+        <h1 class="font-semibold text-lg">Schedule</h1>
+        <div class="text-xs  w-full grid gap-4 pb-32">
+            <script>
+                function getDayName(day) {
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Everyday'];
+                    return days[day];
+                }
+            </script>
+            <% alarms.forEach(alarm=> { %>
+                <div
+                    class="bg-white text-gray-500 shadow-xl w-full rounded-xl overflow-hidden flex justify-between items-center">
+                    <div class=" px-4 py-2 ">
+                        <h1 class="text-xl text-black font-bold">
+                            <%= alarm.hour %> : <%= alarm.minute %>
+                        </h1><!-- {hour} + ":" + {minute} -->
+                        <h2>
+                            <script>document.write(getDayName(<%= alarm.day %>));</script>
+                        </h2><!-- {Day} -->
+                        <h2>
+                            <%= alarm.message %> gr
+                        </h2><!-- {Message} + "gr"-->
+                    </div>
+                    <button id="<%= alarm.id %>"
+                        class="bg-blue-300 h-full w-12 rounded-md flex items-center justify-center" href="">
+                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M17.9667 4.21068L20.7894 7.03335M21.3334 17V21C21.3334 21.7073 21.0524 22.3855 20.5523 22.8856C20.0522 23.3857 19.374 23.6667 18.6667 23.6667H4.00004C3.2928 23.6667 2.61452 23.3857 2.11442 22.8856C1.61433 22.3855 1.33337 21.7073 1.33337 21V6.33335C1.33337 5.6261 1.61433 4.94783 2.11442 4.44773C2.61452 3.94763 3.2928 3.66668 4.00004 3.66668H8.00004M19.7814 1.72401L12.1454 9.36001C11.7508 9.75401 11.4817 10.256 11.372 10.8027L10.6667 14.3333L14.1974 13.6267C14.744 13.5173 15.2454 13.2493 15.64 12.8547L23.276 5.21868C23.5055 4.98922 23.6875 4.7168 23.8117 4.417C23.9359 4.11719 23.9998 3.79586 23.9998 3.47135C23.9998 3.14684 23.9359 2.8255 23.8117 2.5257C23.6875 2.22589 23.5055 1.95348 23.276 1.72401C23.0466 1.49455 22.7742 1.31253 22.4744 1.18835C22.1745 1.06416 21.8532 1.00024 21.5287 1.00024C21.2042 1.00024 20.8829 1.06416 20.5831 1.18835C20.2832 1.31253 20.0108 1.49455 19.7814 1.72401Z"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+                <% }); %>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Menu bar -->
+    <div
+        class=" fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 bg-white border border-gray-200 rounded-full bottom-4 left-1/2 dark:bg-gray-700 dark:border-gray-600">
+        <div class="grid h-full max-w-lg grid-cols-3 mx-auto">
+            <button data-tooltip-target="tooltip-home" type="button"
+                class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                <svg class="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
+                    aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                </svg>
+                <span class="sr-only">Home</span>
+            </button>
+            <div id="tooltip-home" role="tooltip"
+                class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Home
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+            <div class="flex items-center justify-center">
+                <button id="showFormButton" data-tooltip-target="tooltip-new" type="button"
+                    class="inline-flex items-center justify-center w-10 h-10 font-medium bg-blue-600 rounded-full hover:bg-blue-700 group focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800">
+                    <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 18 18">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 1v16M1 9h16" />
+                    </svg>
+                    <span class="sr-only">New item</span>
+                </button>
+            </div>
+            <div id="tooltip-new" role="tooltip"
+                class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Create new schedule
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+            <button data-tooltip-target="tooltip-profile" type="button"
+                class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                <svg class="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
+                    aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
+                </svg>
+                <span class="sr-only">Profile</span>
+            </button>
+            <div id="tooltip-profile" role="tooltip"
+                class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Profile
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.js"
+        integrity="sha512-bUju8VkXhCQgW7zCHSdiIDpECo/lqzChkKrKoc1v2PL2XqO/0Q2Y8dhu07+q6Rk+1c1xr6cfE0VZnumgwy93Ig=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function showAlert() {
+            Swal.fire({
+                title: 'Good job!',
+                text: 'Sukses memberi Makan',
+                icon: 'success'
+            });
+        }
+        function sendMessage() {
+            const portion = document.getElementById('portion').value;
+            const url = `/send-message?message=${encodeURIComponent(portion)}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // alert(data);
+                    showAlert();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+    <script>
+        const socket = new WebSocket('ws://localhost:3000'); // Sesuaikan dengan alamat server WebSocket
+
+        socket.onmessage = function (event) {
+            const latestMessage = event.data;
+            console.log('Received message:', latestMessage);
+            document.getElementById('latestMessage').innerHTML = `<p> ${latestMessage} %</p>`;
+        };
+
+        socket.onerror = function (error) {
+            console.error('WebSocket Error:', error);
+        };
+    </script>
+    <script>
+
+        //show modal
+        document.getElementById('showFormButton').addEventListener('click', function () {
+            Swal.fire({
+                title: 'Tambah Jadwal Alarm',
+                html: `
+                            <form id="alarmForm">
+                                <label for="day">Hari:</label>
+                                <select id="day" name="day" required>
+                                    <option value="7">Every day</option>
+                                    <option value="0">Sunday</option>
+                                    <option value="1">Monday</option>
+                                    <option value="2">Tuesday</option>
+                                    <option value="3">Wednesday</option>
+                                    <option value="4">Thursday</option>
+                                    <option value="5">Friday</option>
+                                    <option value="6">Saturday</option>
+                                </select>
+                                <br>
+                                <label for="hour">Jam (0-23):</label>
+                                <input type="number" id="hour" name="hour" required><br>
+                                <label for="minute">Menit (0-59):</label>
+                                <input type="number" id="minute" name="minute" required><br>
+                                <label for="message">Pesan:</label>
+                                <input type="text" id="message" name="message" required><br>
+                                <button type="submit">Tambah Alarm</button>
+                            </form>
+                        `,
+                showConfirmButton: false,
+                didOpen: () => {
+                    document.getElementById('alarmForm').addEventListener('submit', function (event) {
+                        event.preventDefault();
+
+                        const day = document.getElementById('day').value;
+                        const hour = document.getElementById('hour').value;
+                        const minute = document.getElementById('minute').value;
+                        const message = document.getElementById('message').value;
+
+                        console.log('Submitting form:', {
+                            day,
+                            hour,
+                            minute,
+                            message
+                        }); // Debugging log
+
+                        fetch('/add-alarm', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                day,
+                                hour,
+                                minute,
+                                message
+                            })
+                        }).then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire('Sukses', 'Alarm berhasil ditambahkan', 'success');
+                                } else {
+                                    Swal.fire('Gagal', 'Gagal menambahkan alarm', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error); // Log error
+                                Swal.fire('Error', 'Terjadi kesalahan saat menambahkan alarm', 'error');
+                            });
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

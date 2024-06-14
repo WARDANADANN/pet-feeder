@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Scheduler</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+
+<body>
+    <button id="showFormButton">Tambah Jadwal Alarm</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Fungsi untuk melakukan polling
+        function pollServer() {
+            fetch('/latest-message') // Ganti dengan endpoint yang sesuai di server Anda
+                .then(response => response.json())
+                .then(data => {
+                    // Memperbarui pesan terbaru jika ada
+                    if (data.latestMessage) {
+                        document.getElementById('latestMessage').innerHTML = `<p>${data.latestMessage} %</p>`;
+                    } else {
+                        document.getElementById('latestMessage').innerHTML = `<p>...</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling server:', error);
+                });
+        }
+
+        // Panggil fungsi polling setiap 5 detik
+        setInterval(pollServer, 1000); // 5000 milidetik = 5 detik
+    </script>
+    <script>
+        document.getElementById('showFormButton').addEventListener('click', function () {
+            Swal.fire({
+                title: 'Tambah Jadwal Alarm',
+                html: `
+                    <form id="alarmForm">
+                        <label for="day">Hari:</label>
+                        <select id="day" name="day" required>
+                            <option value="-1">Every day</option>
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </select>
+                        <br>
+                        <label for="hour">Jam (0-23):</label>
+                        <input type="number" id="hour" name="hour" required><br>
+                        <label for="minute">Menit (0-59):</label>
+                        <input type="number" id="minute" name="minute" required><br>
+                        <label for="message">Pesan:</label>
+                        <input type="text" id="message" name="message" required><br>
+                        <button type="submit">Tambah Alarm</button>
+                    </form>
+                `,
+                showConfirmButton: false,
+                didOpen: () => {
+                    document.getElementById('alarmForm').addEventListener('submit', function (event) {
+                        event.preventDefault();
+
+                        const day = document.getElementById('day').value;
+                        const hour = document.getElementById('hour').value;
+                        const minute = document.getElementById('minute').value;
+                        const message = document.getElementById('message').value;
+
+                        console.log('Submitting form:', {
+                            day,
+                            hour,
+                            minute,
+                            message
+                        }); // Debugging log
+
+                        fetch('/add-alarm', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                day,
+                                hour,
+                                minute,
+                                message
+                            })
+                        }).then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire('Sukses', 'Alarm berhasil ditambahkan', 'success');
+                                } else {
+                                    Swal.fire('Gagal', 'Gagal menambahkan alarm', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error); // Log error
+                                Swal.fire('Error', 'Terjadi kesalahan saat menambahkan alarm', 'error');
+                            });
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
